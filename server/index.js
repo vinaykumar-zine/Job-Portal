@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { now } = require('mongoose');
+const mongoose = require('mongoose')
 const fs = require('fs');
 const path = require('path');
 const { time, error } = require('console');
@@ -36,7 +37,13 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/job", jobRoutes);
 
-
+app.use((err, req, res, next) => {
+    const now = new Date();
+    // const time = `${now.toLocalTimeString()}`;
+    const error = `${req.method} ${req.originalUrl} ${now} `
+    errorStram.write(error + err.stack + "\n");
+    res.status(500).send("Internal server error"); 
+});
 
 app.use((req, res, next) => {
     const now = new Date();
@@ -45,4 +52,8 @@ app.use((req, res, next) => {
     errorStram.write(error + "\n");
     res.status(404).send("Route not found"); 
 });
+
+mongoose.connect("mongodb+srv://vinay:zinevinay@cluster0.acowhsy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        .then(() => console.log("Connected to DB"))
+        .catch((err) => console.log(err));
 app.listen(PORT, () => console.log(`server is running on ${PORT}`));
